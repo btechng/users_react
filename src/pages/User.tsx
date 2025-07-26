@@ -1,28 +1,65 @@
-import React, { useState } from "react";
-import { Typography, Button } from "@mui/material";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
+import {
+  Box,
+  Typography,
+  List,
+  ListItem,
+  ListItemText,
+  Alert,
+} from "@mui/material";
 
-const User = () => {
-  const [userId, setUserId] = useState("");
+interface User {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  email: string;
+}
 
-  const fetchUser = async () => {
-    try {
+const Users = () => {
+  const [users, setUsers] = useState<User[]>([]);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchUsers = async () => {
       const token = localStorage.getItem("token");
-      const res = await axios.get("https://btechng-backend.onrender.com/api/user", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setUserId(res.data.userId);
-    } catch (err: any) {
-      alert(err.response?.data?.error || "Failed to fetch user");
-    }
-  };
+      if (!token) return setError("Not authenticated");
+
+      try {
+        const res = await axios.get(
+          "https://btech-backend-48e8.onrender.com/api/user",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setUsers(res.data);
+      } catch (err: any) {
+        setError(err.response?.data?.error || "Failed to fetch users");
+      }
+    };
+
+    fetchUsers();
+  }, []);
 
   return (
-    <div>
-      <Button variant="contained" onClick={fetchUser}>Get User Info</Button>
-      {userId && <Typography mt={2}>User ID: {userId}</Typography>}
-    </div>
+    <Box maxWidth={600} mx="auto" mt={5}>
+      <Typography variant="h5">All Users</Typography>
+      {error && <Alert severity="error">{error}</Alert>}
+      <List>
+        {users.map((user) => (
+          <ListItem key={user._id}>
+            <ListItemText
+              primary={`${user.firstName} ${user.lastName}`}
+              secondary={`${user.email} — ${user.phoneNumber}`}
+            />
+          </ListItem>
+        ))}
+      </List>
+    </Box>
   );
 };
 
-export default User;
+export default Users;

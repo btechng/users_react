@@ -1,30 +1,50 @@
 import React, { useState } from "react";
-import { TextField, Button, Typography, Box } from "@mui/material";
 import axios from "axios";
+import { TextField, Button, Box, Typography, Alert } from "@mui/material";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [message, setMessage] = useState<string | null>(null);
 
   const handleLogin = async () => {
     try {
-      const res = await axios.post("https://btechng-backend.onrender.com/api/auth/login", {
-        email,
-        password,
-      });
+      const res = await axios.post(
+        "https://btech-backend-48e8.onrender.com/api/auth/login",
+        {
+          email,
+          password,
+        }
+      );
       localStorage.setItem("token", res.data.token);
-      alert("Login successful");
+      setMessage("Login successful!");
     } catch (err: any) {
-      alert(err.response?.data?.error || "Login failed");
+      setMessage(err.response?.data?.error || "Login failed");
     }
   };
 
   return (
-    <Box>
+    <Box maxWidth={400} mx="auto" mt={5}>
       <Typography variant="h5">Login</Typography>
-      <TextField label="Email" fullWidth margin="normal" value={email} onChange={(e) => setEmail(e.target.value)} />
-      <TextField label="Password" type="password" fullWidth margin="normal" value={password} onChange={(e) => setPassword(e.target.value)} />
-      <Button variant="contained" onClick={handleLogin}>Login</Button>
+      {message && <Alert severity="info">{message}</Alert>}
+      <TextField
+        label="Email"
+        fullWidth
+        margin="normal"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+      <TextField
+        label="Password"
+        type="password"
+        fullWidth
+        margin="normal"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+      <Button variant="contained" fullWidth onClick={handleLogin}>
+        Login
+      </Button>
     </Box>
   );
 };
